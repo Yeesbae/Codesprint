@@ -1,0 +1,34 @@
+﻿Port,Berth,Quay Length (m),Area (ha),Max Depth (m),Quay Cranes,Capacity (‘000 TEUs),Country,Congestion
+PSA Singapore,55,18780,810,23,193,43900,Singapore,0.03
+SP-PSA International Port,2,600,27,14.5,4,740,Vietnam,0.08
+Tan Cang Que Vo Inland Depot,3,305,9.6,5,3,248,Vietnam,0.12
+Eastern Sea Laem Chabang Terminal,4,1250,49,15,13,2500,Thailand,0.05
+Thai Connectivity Terminal,2,275,9.5,8.5,3,239,Thailand,0.1
+New Priok Container Terminal One,3,850,32,16,8,1500,Indonesia,0.09
+Dalian Container Terminal,14,4390,235,17.8,35,6600,China,0.04
+Fuzhou Container Terminals,10,2817,261,17.5,26,4680,China,0.07
+Guangzhou Container Terminal,4,810,28,12.5,8,1300,China,0.11
+Tianjin Terminals,10,3400,281,16,34,6100,China,0.05
+LYG-PSA Container Terminal,5,1700,83,16.5,14,2800,China,0.06
+Beibu-Gulf International Container Terminal,6,1810,151.8,15.1,22,5200,China,0.07
+Incheon Container Terminal,3,900,35.5,14,9,1500,Korea,0.08
+Busan Terminals,6,2350,139,17,24,5200,Korea,0.03
+Hibiki Container Terminal,4,1225,43,15,4,1100,Japan,0.09
+PSA SICAL,1,370,10,11.7,3,450,India,0.15
+PSA Chennai,3,832,28,15.5,7,1400,India,0.08
+PSA Mumbai,3,1000,100,16.5,12,2400,India,0.1
+PSA Kolkata,5,812,13.3,8,4,850,India,0.11
+Saudi Global Ports,9,2380,185,16,15,2400,Saudi Arabia,0.12
+PSA Antwerp,16,5721,383,17,59,13100,Belgium,0.02
+PSA Zeebrugge,3,1000,60,0,0,0,Belgium,0.08
+PSA Genova Prà,4,1675,116,15,12,2000,Italy,0.07
+PSA Venice,5,852,28.3,11.5,5,430,Italy,0.09
+PSA Sech,2,526,19.5,15,5,550,Italy,0.1
+PSA Sines,3,1150,56.6,16.5,12,2700,Portugal,0.06
+Mersin International Port,9,3370,124,15.8,12,2600,Turkey,0.06
+Baltic Hub,4,1300,95,17,14,2900,Poland,0.07
+Exolgan Container Terminal,3,1144,67.9,10,10,1100,Argentina,0.1
+PSA Panama,3,1175,40,16.3,11,2000,Panama,0.06
+Sociedad Puerto Industrial Aguadulce,1,600,128,14.5,4,600,Colombia,0.11
+PSA Halifax,4,1500,60,16.8,10,1080,Canada,0.08
+PSA Penn Terminals,1,350,36,11.3,3,503,USA,0.1
