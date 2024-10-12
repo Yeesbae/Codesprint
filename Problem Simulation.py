@@ -89,9 +89,17 @@ def draw_text_with_solid_border(text, font, text_color, border_color, x, y, padd
     pygame.draw.rect(screen, border_color, border_rect)
     screen.blit(text_surf, text_rect)
 
+# Define Routes (List of waypoints for each route)
+route_1 = [(SCREEN_WIDTH // 2.8, 140),(400, 120),(300, 100), (100, 130), (50, 300),(70, 400), (340, 850), (600, 830),(1030,400),(SCREEN_WIDTH // 1.54,350),(SCREEN_WIDTH // 1.24 , 480)]
+route_2 = [(SCREEN_WIDTH // 2.8, 140),(560,200), (600, 250), (670, 360),(1030,400),(SCREEN_WIDTH // 1.54,350),(SCREEN_WIDTH // 1.24 , 480)]
+route_3=[(SCREEN_WIDTH // 2.8, 100),(600,90),(740,70),(800,40),(1000,40),(SCREEN_WIDTH // 1.1, 210),(SCREEN_WIDTH // 1.18, 350),(1520,120)]
+
+# Define colors for the routes
+route_colors = [(255, 0, 0), (0, 0, 255),(0, 255, 0)]  # Red and Blue for different routes
+
 start_button = Button("Start", SCREEN_WIDTH // 2 - 100, 500, 200, 80, GRAY, BLUE,"rect", start_game)
 Singapore_button = Button("Singapore", SCREEN_WIDTH // 1.3 , 450, 120, 40, GRAY, BLUE,"circle", data_game)
-India_button = Button("India", SCREEN_WIDTH // 1.65 , 300, 120, 40, GRAY, BLUE,"circle", data_game)
+India_button = Button("India", SCREEN_WIDTH // 1.65 , 320, 120, 40, GRAY, BLUE,"circle", data_game)
 Turkey_button = Button("Turkey", SCREEN_WIDTH // 3.1 , 100, 120, 40, GRAY, BLUE,"circle", data_game)
 China_button = Button( "China",SCREEN_WIDTH // 1.17, 190, 120, 40, GRAY, BLUE, "circle",data_game)
 Vietnam_button = Button("Vietnam", SCREEN_WIDTH // 1.25, 350, 120, 40, GRAY, BLUE, "circle",data_game)
@@ -115,6 +123,14 @@ def game_page():
         Turkey_button.draw(screen,button_font)
         China_button.draw(screen,button_font)
         Vietnam_button.draw(screen,button_font)
+            # Draw routes
+        for route, color in zip([route_1, route_2,route_3], route_colors):
+            pygame.draw.lines(screen, color, False, route, 5)  # '5' is the line thickness
+
+        # Add route markers (optional)
+        #for route, color in zip([route_1, route_2], route_colors):
+        #    for point in route:
+        #        pygame.draw.circle(screen, color, point, 7)  # Draws small circles on waypoints
         pygame.display.flip()
         clock.tick(60)
 
