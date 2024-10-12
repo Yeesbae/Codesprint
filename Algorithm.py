@@ -44,13 +44,18 @@ port_locations = {
 }
 
 # Function to calculate the weight between two ports
-def calculate_weight(port1, port2, alpha=1, beta=1.5, gamma=3, delta=1):
-    # Calculate geographical distance
+def calculate_weight(port1, port2, alpha=1, beta=1, gamma=1, delta=1):
+    # Calculate geographical distance using the Haversine formula
     if port1 in port_locations and port2 in port_locations:
         distance = geodesic(port_locations[port1], port_locations[port2]).kilometers
     else:
         print(f"Location missing for {port1} or {port2}")
-        return 0
+        return 0  # No connection or invalid ports
+
+    # Handle specific cases (e.g., non-ideal Turkey-China route via rail)
+    if (port1 == 'Turkey' and port2 == 'China') or (port1 == 'China' and port2 == 'Turkey'):
+        print(f"Non-ideal rail route detected between {port1} and {port2}. Increasing weight.")
+        distance *= 1.5  # Arbitrary multiplier to account for rail inefficiency
 
     # Fetch port data for congestion and capacity
     port1_data = normalized_df.loc[normalized_df['Country'] == port1]
@@ -64,8 +69,10 @@ def calculate_weight(port1, port2, alpha=1, beta=1.5, gamma=3, delta=1):
     congestion_weight = alpha * port1_data['Avg_Congestion_Percentage'].values[0] + beta * port2_data['Avg_Congestion_Percentage'].values[0]
     capacity_weight = gamma * (port1_data['Total_Designed_Capacity_TEUs'].values[0] + port2_data['Total_Designed_Capacity_TEUs'].values[0])
 
-    # Calculate final weight
+    # Final weight calculation (penalty for rail routes applied)
     weight = congestion_weight + distance - capacity_weight
+    
+    # Ensure the weight is positive
     return max(weight, 0)
 
 # Create a new DataFrame for storing the weighted adjacency matrix
