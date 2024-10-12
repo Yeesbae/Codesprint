@@ -19,7 +19,7 @@ LIGHT_GRAY = (200, 200, 200)
 font = pygame.font.SysFont(None, 24)
 
 # Load adjacency matrix from CSV
-adj_matrix_file = 'adjacency_matrix.csv'
+adj_matrix_file = 'adjacency_matrix.csv'  # Updated CSV name
 df = pd.read_csv(adj_matrix_file, index_col=0)
 
 # Initialize Pygame display
@@ -29,15 +29,15 @@ pygame.display.set_caption("Dijkstra's Algorithm Visualization")
 # Graph object from NetworkX
 G = nx.Graph()
 
-# Define positions for the nodes (you can adjust these as necessary)
+# Define positions for the nodes (adjust these as necessary)
 positions = {
     'Singapore': (100, 200),
     'Vietnam': (200, 100),
     'Turkey': (400, 200),
     'China': (500, 100),
     'India': (300, 300),
-    'Cape Town': (600, 400),
-    'Suez Canal': (700, 200)
+    'CapeTown': (600, 400),
+    'SuezCanal': (700, 200)
 }
 
 # Add nodes
@@ -82,7 +82,7 @@ def draw_graph():
         mid_x = (positions[edge[0]][0] + positions[edge[1]][0]) // 2
         mid_y = (positions[edge[0]][1] + positions[edge[1]][1]) // 2
         weight = edge[2]['weight']
-        text = font.render(str(round(weight, 2)), True, BLACK)
+        text = font.render(str(int(weight)), True, BLACK)  # Show integer weights
         screen.blit(text, (mid_x, mid_y))
     
     for node, pos in positions.items():

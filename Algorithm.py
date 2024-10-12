@@ -1,111 +1,77 @@
 import pandas as pd
-import numpy as np
-from geopy.distance import geodesic
+import searoute as sr  # Assuming this is the searoute module
 
-# Load the adjacency matrix from 'port_network.csv'
-adjacency_matrix_file = 'port_network.csv'
+# Load the adjacency matrix (port network)
+adjacency_matrix_file = 'port_network.csv'  # Update with the path to your file
 adj_matrix = pd.read_csv(adjacency_matrix_file, index_col=0)
 
-# Load the port data from 'Aggregated_Ports_By_Country.csv'
-ports_data_file = 'Aggregated_Ports_By_Country.csv'
+# Load the port data with lat/long and Total Designed Capacity
+ports_data_file = 'Aggregated_Ports_By_Country.csv'  # Update with the path to your file
 df_ports = pd.read_csv(ports_data_file)
 
-# Clean up column and index names (strip leading/trailing spaces)
+# Strip any extra spaces from the names
 df_ports['Country'] = df_ports['Country'].str.strip()
 adj_matrix.columns = adj_matrix.columns.str.strip()
 adj_matrix.index = adj_matrix.index.str.strip()
 
-# Aritifical Data to mimick weight calculation.
-manual_data = pd.DataFrame({
-    'Country': ['Cape Town', 'Suez Canal'],
-    'Total_Berths': [10, 8],
-    'Total_Area_ha': [100, 120],
-    'Total_Designed_Capacity_TEUs': [2000000, 3000000],
-    'Avg_Congestion_Percentage': [70, 80]
-})
+# Map the lat/long and capacity to ports in a dictionary
+port_locations = dict(zip(df_ports['Country'], zip(df_ports['Latitude'], df_ports['Longitude'])))
+port_capacities = dict(zip(df_ports['Country'], df_ports['Total_Designed_Capacity_TEUs']))
 
-# Append manual data to df_ports
-df_ports = pd.concat([df_ports, manual_data], ignore_index=True)
+# Initialize distance matrix
+distance_matrix = adj_matrix.copy()
 
-# Normalize the port data (min-max normalization)
-normalized_df = df_ports.copy()
-for column in ['Total_Berths', 'Total_Area_ha', 'Total_Designed_Capacity_TEUs', 'Avg_Congestion_Percentage']:
-    normalized_df[column] = (df_ports[column] - df_ports[column].min()) / (df_ports[column].max() - df_ports[column].min())
+# Track all adjusted distances for normalization later
+all_distances = []
 
-# Define geographical coordinates for the ports
-port_locations = {
-    'Singapore': (1.290270, 103.851959),
-    'Vietnam': (14.058324, 108.277199),
-    'Turkey': (38.963745, 35.243322),
-    'China': (35.861660, 104.195397),
-    'India': (20.593684, 78.962880),
-    'Cape Town': (-33.918861, 18.424055),
-    'Suez Canal': (30.585164, 32.559899)
-}
-
-# Function to calculate the weight between two ports
-def calculate_weight(port1, port2, alpha=1, beta=1, gamma=1, delta=1):
-    # Calculate geographical distance using the Haversine formula
-    if port1 in port_locations and port2 in port_locations:
-        distance = geodesic(port_locations[port1], port_locations[port2]).kilometers
-    else:
-        print(f"Location missing for {port1} or {port2}")
-        return 0  # No connection or invalid ports
-
-    # Handle specific cases (e.g., non-ideal Turkey-China route via rail)
-    if (port1 == 'Turkey' and port2 == 'China') or (port1 == 'China' and port2 == 'Turkey'):
-        print(f"Non-ideal rail route detected between {port1} and {port2}. Increasing weight.")
-        distance *= 1.5  # Arbitrary multiplier to account for rail inefficiency
-
-    # Fetch port data for congestion and capacity
-    port1_data = normalized_df.loc[normalized_df['Country'] == port1]
-    port2_data = normalized_df.loc[normalized_df['Country'] == port2]
-
-    if port1_data.empty or port2_data.empty:
-        print(f"Port data missing for: {port1} or {port2}")
-        return 0
-
-    # Calculate weight based on congestion and capacity
-    congestion_weight = alpha * port1_data['Avg_Congestion_Percentage'].values[0] + beta * port2_data['Avg_Congestion_Percentage'].values[0]
-    capacity_weight = gamma * (port1_data['Total_Designed_Capacity_TEUs'].values[0] + port2_data['Total_Designed_Capacity_TEUs'].values[0])
-
-    # Final weight calculation (penalty for rail routes applied)
-    weight = congestion_weight + distance - capacity_weight
-    
-    # Ensure the weight is positive
-    return max(weight, 0)
-
-# Create a new DataFrame for storing the weighted adjacency matrix
-weighted_adj_matrix = adj_matrix.copy()
-
-# Calculate the weights for each connection in the adjacency matrix
-weights = []  # Store all non-zero weights for scaling
 for port1 in adj_matrix.index:
     for port2 in adj_matrix.columns:
-        if adj_matrix.loc[port1, port2] == 1:  # Only process valid connections
-            weight = calculate_weight(port1, port2)
-            weighted_adj_matrix.loc[port1, port2] = weight
-            if weight > 0:
-                weights.append(weight)
+        if port1 != port2 and adj_matrix.loc[port1, port2] == 1:
+            if port1 in port_locations and port2 in port_locations:
+                coord1 = port_locations[port1]
+                coord2 = port_locations[port2]
+
+                # Swap lat/lon for searoute API if it expects (longitude, latitude)
+                coord1 = [coord1[1], coord1[0]]  # Change (latitude, longitude) to (longitude, latitude)
+                coord2 = [coord2[1], coord2[0]]  # Change (latitude, longitude) to (longitude, latitude)
+
+                # Use the searoute function
+                try:
+                    route = sr.searoute([coord1[0], coord1[1]], [coord2[0], coord2[1]])
+                    distance = route.properties['length']  # Distance in nautical miles
+
+                    # Incorporate Total Designed Capacity into the calculation
+                    capacity1 = port_capacities[port1]
+                    capacity2 = port_capacities[port2]
+
+                    # Example: Adjust the distance by adding a fraction of the total capacity (you can adjust the formula)
+                    combined_capacity = capacity1 + capacity2
+                    adjusted_distance = distance + combined_capacity * 0.00001  # Adjust factor as needed
+
+                    # Store the adjusted distance temporarily
+                    all_distances.append(adjusted_distance)
+
+                except Exception:
+                    all_distances.append(0)  # Handle failure by setting 0 or another value
+
+# Step 2: Normalize distances to ensure the maximum value is 100
+max_distance = max(all_distances) if all_distances else 1  # Avoid division by zero
+
+# Initialize a counter to iterate through the normalized values
+distance_index = 0
+
+for port1 in adj_matrix.index:
+    for port2 in adj_matrix.columns:
+        if port1 != port2 and adj_matrix.loc[port1, port2] == 1:
+            # Normalize the adjusted distance to be a value between 0 and 100, and convert to integer
+            normalized_distance = int((all_distances[distance_index] / max_distance) * 100)
+            distance_matrix.loc[port1, port2] = normalized_distance
+            distance_index += 1
         else:
-            weighted_adj_matrix.loc[port1, port2] = 0  # No connection
+            distance_matrix.loc[port1, port2] = 0  # No connection or invalid data
 
-# Apply min-max scaling to the weights
-min_weight = min(weights)
-max_weight = max(weights)
+# Save the updated adjacency matrix with normalized distances
+output_file = 'adjacency_matrix.csv'  # Specify your output file path
+distance_matrix.to_csv(output_file)
 
-# Scaling function to rescale weights between a new range (e.g., 1 to 100)
-def scale_weight(weight, min_weight, max_weight, new_min=1, new_max=100):
-    if weight == 0:
-        return 0
-    return ((weight - min_weight) / (max_weight - min_weight)) * (new_max - new_min) + new_min
-
-# Apply scaling to the weighted matrix
-for port1 in weighted_adj_matrix.index:
-    for port2 in weighted_adj_matrix.columns:
-        weighted_adj_matrix.loc[port1, port2] = scale_weight(weighted_adj_matrix.loc[port1, port2], min_weight, max_weight)
-
-# Save the scaled weighted adjacency matrix to a CSV file
-weighted_adj_matrix.to_csv('adjacency_matrix.csv')
-
-print("Scaled weighted adjacency matrix saved to 'adjacency_matrix.csv'")
+print("Adjacency matrix with normalized distances saved to:", output_file)

@@ -1,6 +1,8 @@
-Country,Total_Berths,Total_Area_ha,Total_Designed_Capacity_TEUs,Avg_Congestion_Percentage
-China,49,1039.8,26680000,67.5
-India,12,151.3,5100000,61.25
-Turkey,9,124,2600000,75
-Singapore,55,810.0,43900000,85.0
-Vietnam,5,36.6,988000,57.5
+Country,Total_Berths,Total_Area_ha,Total_Designed_Capacity_TEUs,Avg_Congestion_Percentage,Latitude,Longitude
+China,49,1039.8,26680000,67.5,35.861660, 104.195397
+India,12,151.3,5100000,61.25,20.593684, 78.962880
+Turkey,9,124,2600000,75,38.963745, 35.243322
+Singapore,55,810.0,43900000,85.0,1.290270, 103.851959
+Vietnam,5,36.6,988000,57.5,14.058324, 108.277199
+CapeTown,0,0,0,100,-33.918861, 18.424055
+SuezCanal,0,0,0,100,30.585164, 32.559899
