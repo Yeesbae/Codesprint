@@ -1,6 +1,17 @@
-Port,Containers Handled (TEU),Cargo Throughput (Million Tons),Berths Available,Average Vessel Turnaround Time (Hours),Annual Revenue (Million USD)
-Singapore,36500000,600,67,12,8000
-Turkey,11000000,300,20,24,2500
-China,27500000,530,55,15,6000
-Vietnam,5000000,150,10,10,1200
-India,14000000,350,35,20,3000
+PortName,Country, Latitude, Longitude, Container Berth, Area(ha),Designed Capacity(TEUs),Port Congestion(%)
+PSA Singapore,Singapore,1.2644,103.8481,55,810,43900000,85
+PSA Genova Pra,Italy,44.4316,8.8189,4,116,2000000,75
+PSA Venice,Italy,45.4564,12.2929,5,28.3,430000,60
+PSA Sech,Italy,44.4071,8.9299,2,19.5,550000,50
+Dalian Container Terminal, China,38.9267,121.6442,14,235,6600000,70
+Fuzhou Container Terminal, China,26.0753,119.3062,10,261,4680000,65
+Guangzhou Container Terminal, China,23.1034,113.4953,4,28,1300000,80
+Tianjin Terminal, China,38.9828,117.7192,10,281,6100000,75
+Lyg-PSA Container Terminal, China,34.5964,119.22,5,83,2800000,60
+Beibu-Gulf International Container Terminal, China,21.4812,109.12,6,151.8,5200000,55
+SP-PSA International Port, Vietnam,10.6795,106.8629,2,27,740000,70
+Tan Cang Que Vo Inland Container Depot, Vietnam,21.1263,106.2051,3,9.6,248000,45
+PSA Mumbai, India,18.9555,72.9552,3,100,2400000,75
+PSA Chennai, India,13.0827,80.2707,3,28,1400000,70
+PSA Sicla, India,15.2993,74.124,1,10,450000,40
+PSA Kolkata,India,22.5726,88.3639,5,13.3,850000,60
