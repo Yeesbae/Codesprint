@@ -135,12 +135,18 @@ start_button = Button("Start", SCREEN_WIDTH // 2 - 100, 500, 200, 80, GRAY, BLUE
 #Vietnam_button = Button("Vietnam", SCREEN_WIDTH // 1.25, 350, 120, 40, GRAY, BLUE, "circle",data_game)
 back_button = Button("Back", SCREEN_WIDTH // 1.08, 0, 120, 40, GRAY, RED,"rect","", start_game)
 
+Singapore_data = ports_data[ports_data['Country'] == 'Singapore']
+India_data = ports_data[ports_data['Country'] == 'India']
+Turkey_data = ports_data[ports_data['Country'] == 'Turkey']
+China_data = ports_data[ports_data['Country'] == 'China']
+Vietnam_data = ports_data[ports_data['Country'] == 'Vietnam']
+
 port_buttons = [
     Button("Singapore", SCREEN_WIDTH // 1.3, 450, 120, 40, GRAY, BLUE, "circle", ports_data.iloc[0], data_game),
-    Button("India", SCREEN_WIDTH // 1.65, 320, 120, 40, GRAY, BLUE, "circle", ports_data.iloc[1], data_game),
-    Button("Turkey", SCREEN_WIDTH // 3.1, 100, 120, 40, GRAY, BLUE, "circle", ports_data.iloc[2], data_game),
-    Button("China", SCREEN_WIDTH // 1.17, 190, 120, 40, GRAY, BLUE, "circle", ports_data.iloc[3], data_game),
-    Button("Vietnam", SCREEN_WIDTH // 1.25, 350, 120, 40, GRAY, BLUE, "circle", ports_data.iloc[4], data_game)
+    Button("India", SCREEN_WIDTH // 1.65, 320, 120, 40, GRAY, BLUE, "circle", ports_data.iloc[11], data_game),
+    Button("Turkey", SCREEN_WIDTH // 3.1, 100, 120, 40, GRAY, BLUE, "circle", ports_data.iloc[1], data_game),
+    Button("China", SCREEN_WIDTH // 1.17, 190, 120, 40, GRAY, BLUE, "circle", ports_data.iloc[4], data_game),
+    Button("Vietnam", SCREEN_WIDTH // 1.25, 350, 120, 40, GRAY, BLUE, "circle", ports_data.iloc[9], data_game)
 ]
 
 def game_page():
