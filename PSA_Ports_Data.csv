@@ -1,8 +1,6 @@
 PortName,Country, Latitude, Longitude, Container Berth, Area(ha),Designed Capacity(TEUs),Port Congestion(%)
 PSA Singapore,Singapore,1.2644,103.8481,55,810,43900000,85
-PSA Genova Pra,Italy,44.4316,8.8189,4,116,2000000,75
-PSA Venice,Italy,45.4564,12.2929,5,28.3,430000,60
-PSA Sech,Italy,44.4071,8.9299,2,19.5,550000,50
+Mersin International Port,Turkey,36.8048,34.6399,9,124,2600000,75
 Dalian Container Terminal, China,38.9267,121.6442,14,235,6600000,70
 Fuzhou Container Terminal, China,26.0753,119.3062,10,261,4680000,65
 Guangzhou Container Terminal, China,23.1034,113.4953,4,28,1300000,80

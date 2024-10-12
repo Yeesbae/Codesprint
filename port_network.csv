@@ -1,0 +1,8 @@
+, Singapore, Vietnam, Turkey, China, India, Cape Town, Suez Canal
+Singapore, 0, 1, 0, 1, 1, 1, 1
+Vietnam, 1, 0, 0, 1, 0, 0, 0
+Turkey, 0, 0, 0, 1, 0, 1, 1
+China, 1, 1, 1, 0, 0, 0, 0
+India, 1, 0, 0, 0, 0, 1, 1
+Cape Town, 1, 0, 1, 0, 1, 0, 0
+Suez Canal, 1, 0, 1, 0, 1, 0, 0
