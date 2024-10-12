@@ -17,6 +17,7 @@ adj_matrix.index = adj_matrix.index.str.strip()
 # Map the lat/long and capacity to ports in a dictionary
 port_locations = dict(zip(df_ports['Country'], zip(df_ports['Latitude'], df_ports['Longitude'])))
 port_capacities = dict(zip(df_ports['Country'], df_ports['Total_Designed_Capacity_TEUs']))
+port_fullness = dict(zip(df_ports['Country'], df_ports['Avg_Congestion_Percentage']))
 
 # Initialize distance matrix
 distance_matrix = adj_matrix.copy()
@@ -43,18 +44,22 @@ for port1 in adj_matrix.index:
                     # Incorporate Total Designed Capacity into the calculation
                     capacity1 = port_capacities[port1]
                     capacity2 = port_capacities[port2]
+                    port_fullness1 = port_fullness[port1]
+                    port_fullness2 = port_fullness[port2]
 
                     # Example: Adjust the distance by adding a fraction of the total capacity (you can adjust the formula)
-                    combined_capacity = capacity1 + capacity2
-                    adjusted_distance = distance + combined_capacity * 0.00001  # Adjust factor as needed
+                    combined_capacity = capacity1 * (1 - port_fullness1) + capacity2 * (1 - port_fullness2)
+                    adjusted_distance = distance + combined_capacity * 0.001  # Adjust factor as needed
 
                     # Store the adjusted distance temporarily
                     all_distances.append(adjusted_distance)
 
-                except Exception:
+                except Exception as e:
+                    print(f"Error calculating route from {port1} to {port2}: {e}")
                     all_distances.append(0)  # Handle failure by setting 0 or another value
 
-# Step 2: Normalize distances to ensure the maximum value is 100
+# Step 2: Normalize distances to ensure the values are scaled between 1 and 100
+min_distance = min(all_distances) if all_distances else 0  # Ensure min is not zero for scaling
 max_distance = max(all_distances) if all_distances else 1  # Avoid division by zero
 
 # Initialize a counter to iterate through the normalized values
@@ -63,8 +68,8 @@ distance_index = 0
 for port1 in adj_matrix.index:
     for port2 in adj_matrix.columns:
         if port1 != port2 and adj_matrix.loc[port1, port2] == 1:
-            # Normalize the adjusted distance to be a value between 0 and 100, and convert to integer
-            normalized_distance = int((all_distances[distance_index] / max_distance) * 100)
+            # Normalize the adjusted distance to be a value between 1 and 100, and convert to integer
+            normalized_distance = int(((all_distances[distance_index] - min_distance) / (max_distance - min_distance)) * 99) + 1
             distance_matrix.loc[port1, port2] = normalized_distance
             distance_index += 1
         else:
