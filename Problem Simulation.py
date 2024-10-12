@@ -94,9 +94,9 @@ def main_menu():
         screen.blit(world_map, (0, 0))
         draw_text_with_solid_border("Main Menu", font, BLACK, GRAY, SCREEN_WIDTH // 2, 100)
         start_button.draw(screen)
-        draw_text_with_solid_border("User 1", small_font, BLACK, GRAY, SCREEN_WIDTH // 2, 630)
-        draw_text_with_solid_border("User 2", small_font, BLACK, GRAY, SCREEN_WIDTH // 2, 670)
-        draw_text_with_solid_border("User 3", small_font, BLACK, GRAY, SCREEN_WIDTH // 2, 710)
+        draw_text_with_solid_border("Ming Kai", small_font, BLACK, GRAY, SCREEN_WIDTH // 2, 630)
+        draw_text_with_solid_border("Wei Hao", small_font, BLACK, GRAY, SCREEN_WIDTH // 2, 670)
+        draw_text_with_solid_border("Chris", small_font, BLACK, GRAY, SCREEN_WIDTH // 2, 710)
 
         pygame.display.flip()
         clock.tick(60)
