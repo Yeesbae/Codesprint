@@ -24,9 +24,11 @@ font = pygame.font.Font(None, 74)
 button_font = pygame.font.Font(None, 50)
 small_font = pygame.font.Font(None, 36)
 
-#Loading the image
+#Loading the images
 world_map = pygame.image.load('PSA-Global-Network-1.png')
 world_map = pygame.transform.scale(world_map, (SCREEN_WIDTH, SCREEN_HEIGHT))
+simulated_map = pygame.image.load("LocationMap.png")
+simulated_map = pygame.transform.scale(simulated_map, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 class Button:
     def __init__(self, text, x, y, width, height, color, hover_color, action=None):
@@ -73,10 +75,7 @@ def game_page():
             if event.type == pygame.QUIT:
                 running = False
         
-        screen.fill(WHITE)
-        text = font.render("Simulated", True, BLACK)
-        screen.blit(text, (350, 250))
-        
+        screen.blit(simulated_map, (0, 0))
         pygame.display.flip()
         clock.tick(60)
     
