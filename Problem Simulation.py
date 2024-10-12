@@ -15,7 +15,8 @@ clock = pygame.time.Clock()
 
 # Load port data
 data = pd.read_csv('PSA_Ports_Data.csv')
-ports_data = data[["PortName", "Country", "Latitude", "Longitude", "Port Congestion(%)"]]
+ports_data = data[["PortName", "Country", "Container Berth", "Area(ha)", "Port Congestion(%)","Designed Capacity(TEUs)","Suez Canal Risk","Strait of Malacca Risk","Bab el-Mandeb Risk","South China Sea Risk","Indian Ocean Monsoon Risk"			
+]]
 
 #Color Constants
 WHITE = (255, 255, 255)
@@ -172,24 +173,48 @@ def game_page():
         pygame.display.flip()
         clock.tick(60)
         if current_page == "data":
-            data_page()
+            data_page(hovered_button.port_info)
 
     pygame.quit()
     sys.exit()
-def data_page():
+def data_page(port_info):
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             back_button.check_click(event)
-        
+
+        # Clear the screen and draw the world map
         screen.blit(world_map, (0, 0))
-        back_button.draw(screen,button_font)
+        back_button.draw(screen, button_font)
+
+        # Display the relevant port information
+        lines = [
+            f"Port: {port_info['PortName']}",
+            f"Country: {port_info['Country']}",
+            f"Congestion: {port_info['Port Congestion(%)']}%"
+            f"Port: {port_info['Container Berth']}",
+            f"Area(ha): {port_info['Area(ha)']}",
+            f"Designed Capacity(TEUs): {port_info['Designed Capacity(TEUs)']}",
+            f"Suez Canal Risk: {port_info['Suez Canal Risk']}",
+            f"Strait of Malacca Risk: {port_info['Strait of Malacca Risk']}",
+            f"Bab el-Mandeb Risk: {port_info['Bab el-Mandeb Risk']}",
+            f"South China Sea Risk: {port_info['South China Sea Risk']}",
+            f"Indian Ocean Monsoon Risk: {port_info['Indian Ocean Monsoon Risk']}"
+        ]
+        
+        
+        # Draw the port information on the screen
+        for i, line in enumerate(lines):
+            text_surface = small_font.render(line, True, BLACK)
+            screen.blit(text_surface, (50, 100 + i * 30))  # Adjust the position as needed
+
         pygame.display.flip()
         clock.tick(60)
-        if current_page=="game":
-            game_page()
+
+        if current_page == "game":
+            game_page()  # Go back to the game page if the current_page is changed
 
     pygame.quit()
     sys.exit()
