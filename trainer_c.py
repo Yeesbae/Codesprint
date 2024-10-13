@@ -20,11 +20,12 @@ X = np.array(data)
     
 # Target variable: 1 for high congestion, 0 for low congestion
 y = np.where(
-    (new_df['Capacity (‘000 TEUs)'] >= 300) & 
-    (new_df['Berth'] >= 11) & 
-    (new_df['Area (ha)'] >= 40) &
-    (new_df['Quay Cranes'] >= 20) &
-    (new_df['Quay Length (m)'] >= 1000), 
+    (new_df['Capacity (‘000 TEUs)'] <= 300) & 
+    (new_df['Berth'] <= 11) & 
+    (new_df['Area (ha)'] <= 40) &
+    (new_df['Quay Cranes'] <= 20) &
+    (new_df['Quay Length (m)'] <= 1000) &
+    (new_df['Congestion'] >= 0.09), 
     1, 
     0
 )
@@ -43,14 +44,14 @@ print(f"Accuracy: {accuracy:.2f}")
 
 
 # Save the trained model to a file
-model_filename = 'logistic_regression_model.pkl'
+model_filename = 'logistic_regression_model.joblib'
 joblib.dump(model, model_filename)
 print(f"Model saved to {model_filename}")
 
 
-new_ports = np.array([
-    [51,18780,810,23,198,41154,0.03]
-])
+# new_ports = np.array([
+#     [51,18780,810,23,198,41154,0.03]
+# ])
 
 # predicted_congestion = model.predict(new_ports)
 
