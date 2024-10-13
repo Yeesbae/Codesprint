@@ -121,10 +121,16 @@ def start_game():
 def data_game():
     global current_page
     current_page = "data"
+def down_game():
+    global current_page
+    current_page = "down"
 
 def next_game():
     global current_page
     current_page = "next"
+def simulate_game():
+    global current_page
+    current_page = "simulate"
 
 def draw_text_with_solid_border(text, font, text_color, border_color, x, y, padding=10):
     text_surf = font.render(text, True, text_color)
@@ -145,21 +151,13 @@ route_3 = [(SCREEN_WIDTH // 2.8, 100),(600,90),(740,70),(800,40),(1000,40),(SCRE
 route_colors = [(255, 0, 0), (0, 0, 255),(0, 255, 0)]  # Red and Blue for different routes
 
 start_button = Button("Start", SCREEN_WIDTH // 2 - 100, 500, 200, 80, GRAY, BLUE,"rect","", start_game)
-#Singapore_button = Button("Singapore", SCREEN_WIDTH // 1.3 , 450, 120, 40, GRAY, BLUE,"circle", data_game)
-#India_button = Button("India", SCREEN_WIDTH // 1.65 , 320, 120, 40, GRAY, BLUE,"circle", data_game)
-#Turkey_button = Button("Turkey", SCREEN_WIDTH // 3.1 , 100, 120, 40, GRAY, BLUE,"circle", data_game)
-#China_button = Button( "China",SCREEN_WIDTH // 1.17, 190, 120, 40, GRAY, BLUE, "circle",data_game)
-#Vietnam_button = Button("Vietnam", SCREEN_WIDTH // 1.25, 350, 120, 40, GRAY, BLUE, "circle",data_game)
 back_button = Button("Back", SCREEN_WIDTH // 2000, 0, 120, 40, GRAY, RED,"rect","", start_game)
 Next_button = Button("Next", SCREEN_WIDTH // 1.08, 0, 120, 40, GRAY, GREEN,"rect","", data_game)
 Previous_button = Button("Previous", SCREEN_WIDTH // 1900, 0, 150, 40, GRAY, GREEN,"rect","", data_game)
+Down_button = Button("Down", SCREEN_WIDTH // 1900, 850, 150, 40, GRAY, RED,"rect","", down_game)
+Simulate_button = Button("Simulate", SCREEN_WIDTH // 1900, 850, 150, 40, GRAY, BLUE,"rect","", simulate_game)
+ExitSimulate_button = Button("Exit Simulation", SCREEN_WIDTH // 1400, 850, 200, 40, GRAY, BLUE,"rect","", start_game)
 new_ports_data['Country'] = new_ports_data['Country'].str.strip()
-#Singapore_data = ports_data[ports_data['Country'] == 'Singapore']
-#India_data = ports_data[ports_data['Country'] == 'India']
-#Turkey_data = ports_data[ports_data['Country'] == 'Turkey']
-#China_data = ports_data[ports_data['Country'] == 'China']
-#Vietnam_data = ports_data[ports_data['Country'] == 'Vietnam']
-#print(ports_data[ports_data['Country'] == 'Turkey'])
 
 countrycoed = {
     "Singapore": [SCREEN_WIDTH // 1.3, 450],
@@ -199,6 +197,84 @@ port_buttons = [
     Button("SuezCanal", countrycoed['SuezCanal'][0],countrycoed['SuezCanal'][1], 120, 40, GRAY, BLUE, "circle",None, None),
 ]
 
+def down_page():
+    global current_page
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            Simulate_button.check_click(event)
+        
+        screen.blit(data_map, (0, 0))
+        port_buttons = [
+            Button("Singapore", SCREEN_WIDTH // 2 - 100, 100, 200, 80, GRAY, RED, "rect",None, None),
+            Button("India",SCREEN_WIDTH // 2 - 100, 200, 200, 80, GRAY, RED, "rect",None, None),
+            Button("Turkey",SCREEN_WIDTH // 2 - 100, 300, 200, 80, GRAY, RED, "rect",None, None),
+            Button("China", SCREEN_WIDTH // 2 - 100, 400, 200, 80, GRAY, RED, "rect",None, None),
+            Button("Vietnam",SCREEN_WIDTH // 2 - 100, 500, 200, 80, GRAY, RED, "rect",None, None),
+            Button("CapeTown", SCREEN_WIDTH // 2 - 100, 600, 200, 80, GRAY, RED, "rect",None, None),
+            Button("SuezCanal",SCREEN_WIDTH // 2 - 100, 700, 200, 80,GRAY, RED, "rect",None, None),
+        ]
+        for button in port_buttons:
+             button.draw(screen, button_font)
+        
+        Simulate_button.draw(screen,small_font)
+
+        pygame.display.flip()
+        clock.tick(60)
+        
+        if current_page == "simulate":
+            simulate_page()
+
+        
+    
+    pygame.quit()
+    sys.exit()
+
+def simulate_page():
+    running = True
+    while running:
+        screen.blit(simulated_map, (0, 0))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+            # Check button clicks
+            for button in port_buttons:
+                button.check_click(event)
+            ExitSimulate_button.check_click(event)
+        hovered_button = None  # Reset hovered button for the frame 
+        for button in port_buttons:
+            # Draw each button and check for hover
+            if button.draw(screen, button_font):
+                hovered_button = button  # Save hovered button for displaying info
+
+        # Draw routes
+
+        """
+        for route, color in zip([route_1, route_2, route_3], route_colors):
+            pygame.draw.lines(screen, color, False, route, 5)  # '5' is the line thickness """
+        
+        ExitSimulate_button.draw(screen,small_font)
+
+        # Display hover info if there's a hovered button with associated port_info
+        if hovered_button and hovered_button.port_info is not None:  # Check if port_info is not None
+            display_hover_info(hovered_button.port_info, pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
+
+        pygame.display.flip()
+        clock.tick(60)
+        if current_page == "down":
+            down_page()
+        if current_page == "game":
+            game_page()
+        if current_page == "data":
+            simdata_page(hovered_button.port_info)
+
+    pygame.quit()
+    sys.exit()
+
 def game_page():
     running = True
     while running:
@@ -211,8 +287,9 @@ def game_page():
             # Check button clicks
             for button in port_buttons:
                 button.check_click(event)
+            Down_button.check_click(event)
 
-        hovered_button = None  # Reset hovered button for the frame
+        hovered_button = None  # Reset hovered button for the frame 
         for button in port_buttons:
             # Draw each button and check for hover
             if button.draw(screen, button_font):
@@ -224,7 +301,7 @@ def game_page():
         for route, color in zip([route_1, route_2, route_3], route_colors):
             pygame.draw.lines(screen, color, False, route, 5)  # '5' is the line thickness """
         
-        
+        Down_button.draw(screen,button_font)
 
         for i in range(len(adjacency_matrix_headless)):
             for j in range(len(adjacency_matrix_headless.columns)):
@@ -244,9 +321,72 @@ def game_page():
         clock.tick(60)
         if current_page == "data":
             data_page(hovered_button.port_info)
+        if current_page == "down":
+            down_page()
 
     pygame.quit()
     sys.exit()
+    
+def simdata_page(country_data):
+
+    running = True
+    y_offset = 100  # Starting y-position for the first port's information
+    current_port_index=0
+    max_ports = len(country_data)
+    back_button = Button("Back", SCREEN_WIDTH // 2000, 0, 120, 40, GRAY, RED,"rect","", simulate_game)
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if back_button.check_click(event)and current_port_index==0:
+                simulate_page()
+            elif Next_button.check_click(event):
+                if current_port_index < max_ports - 1:
+                    current_port_index += 1  # Increment to show the next port data
+            elif Previous_button.check_click(event):
+                if current_port_index > 0:
+                    current_port_index -= 1  # Decrement to show the previous port data
+            
+
+        # Clear the screen and draw the data map
+        screen.blit(data_map, (0, 0))
+
+        if current_port_index < max_ports:  # Ensure index is within bounds
+            row = country_data.iloc[current_port_index]  # Get the current row of data
+
+            lines = [
+                f"Port: {row['Port']}",
+                f"Country: {row['Country']}",
+                f"Congestion: {row['Congestion']}%",
+                f"Berth: {row['Berth']}",
+                f"Quay Length (m): {row['Quay Length (m)']}",
+                f"Area (ha): {row['Area (ha)']}",
+                f"Max Depth (m): {row['Max Depth (m)']}",
+                f"Quay Cranes: {row['Quay Cranes']}",
+                f"Capacity (‘000 TEUs): {row['Capacity (‘000 TEUs)']}"
+            ]
+
+            # Draw the current port's information
+            for i, line in enumerate(lines):
+                text_surface = small_font.render(line, True, BLACK)
+                screen.blit(text_surface, (50, y_offset + i * 30))  # Draw each line
+            # Draw the Next button only if there are more ports
+            if current_port_index < max_ports - 1:
+                Next_button.draw(screen, button_font)  # Draw Next button if there are more pages
+            if max_ports > 1 and current_port_index > 0:
+                Previous_button.draw(screen, button_font)  # Draw Previous button
+            elif current_port_index==0:
+                back_button.draw(screen, button_font)
+        pygame.display.flip()
+        clock.tick(60)
+
+        # Return to game page if the back button is clicked
+
+
+
+    pygame.quit()
+    sys.exit()
+
     
 def data_page(country_data):
 
@@ -268,10 +408,10 @@ def data_page(country_data):
             elif Previous_button.check_click(event):
                 if current_port_index > 0:
                     current_port_index -= 1  # Decrement to show the previous port data
+            
 
         # Clear the screen and draw the data map
         screen.blit(data_map, (0, 0))
-
 
         if current_port_index < max_ports:  # Ensure index is within bounds
             row = country_data.iloc[current_port_index]  # Get the current row of data
