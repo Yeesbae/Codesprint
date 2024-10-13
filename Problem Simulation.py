@@ -21,7 +21,7 @@ new_ports_data = new_data[["Port","Berth","Quay Length (m)","Area (ha)","Max Dep
 adjacency_matrix = pd.read_csv('adjacency_matrix.csv')
 locations = adjacency_matrix.index
 adjacency_matrix_headless = adjacency_matrix.drop(adjacency_matrix.columns[0], axis=1)
-
+matrix_values = adjacency_matrix_headless.values
 
 #Color Constants
 WHITE = (255, 255, 255)
@@ -84,10 +84,11 @@ class Button:
         screen.blit(text_surf, text_rect)
         return is_hovered
     def check_click(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONUP:
             if self.rect.collidepoint(event.pos):
                 if self.action:
                     self.action()
+                    print("Button clicked:", self.text)
                     return True
 
 def display_hover_info(new_port_info, x, y):
@@ -131,7 +132,7 @@ def next_game():
 def simulate_game():
     global current_page
     current_page = "simulate"
-
+    
 def draw_text_with_solid_border(text, font, text_color, border_color, x, y, padding=10):
     text_surf = font.render(text, True, text_color)
     text_rect = text_surf.get_rect(center=(x, y))
@@ -139,7 +140,13 @@ def draw_text_with_solid_border(text, font, text_color, border_color, x, y, padd
     pygame.draw.rect(screen, border_color, border_rect)
     screen.blit(text_surf, text_rect)
 
-
+def set_weight(country):
+    global matrix_values
+    for i in range(len(matrix_values)):
+        for j in range(len(matrix_values[i])):
+            if(i == country or j == country) and (matrix_values[i][j] != 0):
+                matrix_values[i][j] = 100
+            
 # Define Routes (List of waypoints for each route)
 """
 route_1 = [(SCREEN_WIDTH // 2.8, 140),(400, 120),(300, 100), (100, 130), (50, 300),(70, 400), (340, 850), (600, 830),(1030,400),(SCREEN_WIDTH // 1.54,350),(SCREEN_WIDTH // 1.24 , 480)]
@@ -200,22 +207,29 @@ port_buttons = [
 def down_page():
     global current_page
     running = True
+
+    port_buttons = [
+            Button("Singapore", SCREEN_WIDTH // 2 - 100, 100, 200, 80, GRAY, RED, "rect",None, lambda: set_weight(0)),
+            Button("India",SCREEN_WIDTH // 2 - 100, 200, 200, 80, GRAY, RED, "rect",None, lambda: set_weight(4)),
+            Button("Turkey",SCREEN_WIDTH // 2 - 100, 300, 200, 80, GRAY, RED, "rect",None, lambda: set_weight(2)),
+            Button("China", SCREEN_WIDTH // 2 - 100, 400, 200, 80, GRAY, RED, "rect",None, lambda: set_weight(3)),
+            Button("Vietnam",SCREEN_WIDTH // 2 - 100, 500, 200, 80, GRAY, RED, "rect",None,lambda: set_weight(1)),
+            Button("CapeTown", SCREEN_WIDTH // 2 - 100, 600, 200, 80, GRAY, RED, "rect",None, lambda: set_weight(5)),
+            Button("SuezCanal",SCREEN_WIDTH // 2 - 100, 700, 200, 80,GRAY, RED, "rect",None, lambda: set_weight(6)),
+        ]
+    
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            
+            for button in port_buttons:
+                button.check_click(event)
+
             Simulate_button.check_click(event)
         
         screen.blit(data_map, (0, 0))
-        port_buttons = [
-            Button("Singapore", SCREEN_WIDTH // 2 - 100, 100, 200, 80, GRAY, RED, "rect",None, None),
-            Button("India",SCREEN_WIDTH // 2 - 100, 200, 200, 80, GRAY, RED, "rect",None, None),
-            Button("Turkey",SCREEN_WIDTH // 2 - 100, 300, 200, 80, GRAY, RED, "rect",None, None),
-            Button("China", SCREEN_WIDTH // 2 - 100, 400, 200, 80, GRAY, RED, "rect",None, None),
-            Button("Vietnam",SCREEN_WIDTH // 2 - 100, 500, 200, 80, GRAY, RED, "rect",None, None),
-            Button("CapeTown", SCREEN_WIDTH // 2 - 100, 600, 200, 80, GRAY, RED, "rect",None, None),
-            Button("SuezCanal",SCREEN_WIDTH // 2 - 100, 700, 200, 80,GRAY, RED, "rect",None, None),
-        ]
+        
         for button in port_buttons:
              button.draw(screen, button_font)
         
@@ -234,6 +248,9 @@ def down_page():
 
 def simulate_page():
     running = True
+    global matrix_values
+    print(matrix_values)
+
     while running:
         screen.blit(simulated_map, (0, 0))
 
@@ -303,9 +320,9 @@ def game_page():
         
         Down_button.draw(screen,button_font)
 
-        for i in range(len(adjacency_matrix_headless)):
-            for j in range(len(adjacency_matrix_headless.columns)):
-                value = adjacency_matrix_headless.iloc[i,j]
+        for i in range(len(matrix_values)):
+            for j in range(len(matrix_values[i])):
+                value = matrix_values[i][j]
                 if(value != 0):
                     country1 = routedic[str(i)]
                     country2 = routedic[str(j)]
