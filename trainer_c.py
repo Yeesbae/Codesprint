@@ -5,12 +5,12 @@ from sklearn.metrics import accuracy_score
 import pandas as pd
 import joblib
 
-# Example port data: [Berth, Quay Length (m), Area (ha), Max Depth (m), Quay Cranes,Capacity (‘000 TEUs)]
+# Example port data: [Berth, Quay Length (m), Area (ha), Quay Cranes,Capacity (‘000 TEUs),Congestion]
 
 file_path = 'randomized_30_samples.xlsx'
 df = pd.read_excel(file_path)
 
-new_df = df.drop(['Port', 'Country'], axis=1)
+new_df = df.drop(['Port', 'Country', 'Max Depth (m)'], axis=1)
 data = new_df.values.tolist()
 
 new_df = new_df.replace({',': ''}, regex=True)
@@ -29,7 +29,6 @@ y = np.where(
     1, 
     0
 )
-# print(X)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=42)
 

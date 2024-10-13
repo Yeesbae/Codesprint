@@ -4,17 +4,14 @@ from sklearn.preprocessing import LabelEncoder
 import pandas as pd
 
 
-file_path = 'logistic_regression_model.joblib'
-csv_file_path = 'data_mk.csv'
 
-model = joblib.load(file_path)
-data = pd.read_csv(csv_file_path)
+model_file = 'logistic_regression_model.joblib'
+model = joblib.load(model_file)
 
-filtered_data = data.drop(columns=['Port', 'Country'])
-datasets = [row.values.reshape(1, -1) for index, row in filtered_data.iterrows()]
+port_info_csv = 'aggregated_ports_by_country.csv'
+port_info = pd.read_csv(port_info_csv)
 
-predictions = [model.predict(dataset) for dataset in datasets]
-predictions = [prediction[0] for prediction in predictions]
-predictions = pd.DataFrame(predictions, columns=['Predictions'])
+adjacency_matrix_csv = 'port_adjacency_matrix_c.csv'
+adjacency_matrix = pd.read_csv(adjacency_matrix_csv)
 
-print(predictions)
+adjacency_matrix_copy = adjacency_matrix.copy()
