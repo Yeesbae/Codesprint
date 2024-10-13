@@ -228,13 +228,14 @@ def game_page():
 
         for i in range(len(adjacency_matrix_headless)):
             for j in range(len(adjacency_matrix_headless.columns)):
-                if(adjacency_matrix_headless.iloc[i,j] != 0):
+                value = adjacency_matrix_headless.iloc[i,j]
+                if(value != 0):
                     country1 = routedic[str(i)]
                     country2 = routedic[str(j)]
                     pos1 = countrycoed_routes[country1]
                     pos2 = countrycoed_routes[country2]
-                    pygame.draw.line(screen, (0,0,0),pos1,pos2,3)
-                    
+                    pygame.draw.line(screen, (255*value/100,255*value/100,255*value/100),pos1,pos2,3)
+
         # Display hover info if there's a hovered button with associated port_info
         if hovered_button and hovered_button.port_info is not None:  # Check if port_info is not None
             display_hover_info(hovered_button.port_info, pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
