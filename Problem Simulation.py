@@ -3,6 +3,11 @@ import pygame
 import sys
 import pandas as pd
 import heapq
+import random
+import joblib as jb
+import math
+import networkx as nx
+import numpy as np
 
 pygame.init()
 
@@ -24,6 +29,116 @@ locations = adjacency_matrix.index
 adjacency_matrix_headless = adjacency_matrix.drop(adjacency_matrix.columns[0], axis=1)
 matrix_values = adjacency_matrix_headless.values
 
+def haversine(coord1, coord2):
+    R = 6371  # Radius of the Earth in kilometers
+    lat1, lon1 = coord1
+    lat2, lon2 = coord2
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
+    a = math.sin(dlat / 2) ** 2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2) ** 2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    distance = R * c
+    return distance
+
+G = nx.Graph()
+
+port_locations = {
+    'Singapore': (1.290270, 103.851959),
+    'Vietnam': (14.058324, 108.277199),
+    'Turkey': (38.963745, 35.243322),
+    'China': (35.861660, 104.195397),
+    'India': (20.593684, 78.962880),
+    'CapeTown': (-33.918861, 18.424055),
+    'SuezCanal': (30.585164, 32.559899)
+}
+
+for port1 in port_locations:
+    G.add_node(port1, pos=port_locations[port1])
+    for port2 in port_locations:
+        if port1 != port2:
+            coord1 = port_locations[port1]
+            coord2 = port_locations[port2]
+            distance = haversine(coord1, coord2)
+            G.add_edge(port1, port2, weight=distance)
+
+all_weights = [d['weight'] for u, v, d in G.edges(data=True)]
+min_weight = min(all_weights)
+max_weight = max(all_weights)
+
+for u, v, d in G.edges(data=True):
+    d['weight'] = 100 * (d['weight'] - min_weight) / (max_weight - min_weight)
+
+port_data = pd.read_csv('Aggregated_Ports_By_Country.csv')
+
+country_ports = {}
+
+for _, row in port_data.iterrows():
+    if row['Country'] in port_locations:
+        if row['Country'] == 'SuezCanal' or row['Country'] == 'CapeTown':
+            country_ports[row['Country']] = {
+                'Berth': 0,
+                'Quay Length (m)': 0,
+                'Area (ha)': 0,
+                'Quay Cranes': 0,
+                'Capacity (‘000 TEUs)': 0,
+                'Congestion': 0,
+                'Latitude': port_locations[row['Country']][0],
+                'Longitude': port_locations[row['Country']][1]
+            }
+        else:
+            country_ports[row['Country']] = {
+                'Berth': row['Total_Berths'],
+                'Quay Length (m)': 0,
+                'Area (ha)': row['Total_Area_ha'],
+                'Quay Cranes': 0,
+                'Capacity (‘000 TEUs)': row['Total_Designed_Capacity_TEUs'],
+                'Congestion': 0,
+                'Latitude': row['Latitude'],
+                'Longitude': row['Longitude']
+            }
+
+for country, data in country_ports.items():
+    data['Congestion'] = random.uniform(0, 0.089)
+    data['Quay Cranes'] = random.randint(21, 50)
+    data['Quay Length (m)'] = random.randint(1001, 3000)
+    if country in ['SuezCanal', 'CapeTown']:
+        data['Berth'] = random.randint(12, 30)
+        data['Capacity (‘000 TEUs)'] = random.randint(301, 1000)
+        data['Area (ha)'] = random.randint(41, 100)
+    if country not in ['SuezCanal', 'CapeTown']:
+        data['Capacity (‘000 TEUs)'] = data['Capacity (‘000 TEUs)'] / 1000
+
+model_path = 'logistic_regression_model.joblib'
+logistic_regression_model = jb.load(model_path)
+
+for port, data in country_ports.items():
+    features = [
+        data['Berth'], data['Quay Length (m)'], data['Area (ha)'], 
+        data['Quay Cranes'], data['Capacity (‘000 TEUs)'], data['Congestion']
+    ]
+    predicted_congestion = logistic_regression_model.predict([features])[0]
+    print(f"Predicted congestion for {port}: {'Congested' if predicted_congestion == 1 else 'Not Congested'}")
+
+for u, v, d in G.edges(data=True):
+    u_data = country_ports[u]
+    v_data = country_ports[v]
+    
+    features = [
+        u_data['Berth'], u_data['Quay Length (m)'], u_data['Area (ha)'], 
+        u_data['Quay Cranes'], u_data['Capacity (‘000 TEUs)'], u_data['Congestion'],
+        v_data['Berth'], v_data['Quay Length (m)'], v_data['Area (ha)'], 
+        v_data['Quay Cranes'], v_data['Capacity (‘000 TEUs)'], v_data['Congestion']
+    ]
+    
+    congestion_u = logistic_regression_model.predict([features[:6]])[0]
+    congestion_v = logistic_regression_model.predict([features[6:]])[0]
+    
+    if congestion_u == 1 or congestion_v == 1:
+        d['weight'] *= 20  # Increase weight by 1000%
+
+adj_matrice = nx.to_numpy_array(G, weight='weight')
+adj_matrice = np.round(adj_matrice)
+adj_matrix = adj_matrice
 #Color Constants
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -118,9 +233,9 @@ def display_hover_info(new_port_info, x, y):
 
 def start_game():
     global current_page
-    global adjacency_matrix_headless
-    global matrix_values
-    matrix_values = adjacency_matrix_headless.values
+    global adj_matrix
+    global adj_matrice
+    adj_matrix = adj_matrice
     current_page = "game"
 
 def data_game():
@@ -145,9 +260,9 @@ def draw_text_with_solid_border(text, font, text_color, border_color, x, y, padd
     screen.blit(text_surf, text_rect)
 
 def set_weight(country):
-    global matrix_values
-    for i in range(len(matrix_values)):
-        for j in range(len(matrix_values[i])):
+    global adj_matrix
+    for i in range(len(adj_matrix)):
+        for j in range(len(adj_matrix[i])):
             if(i == country or j == country) and (matrix_values[i][j] != 0):
                 matrix_values[i][j] = 100
 
@@ -177,7 +292,8 @@ def dijkstra(matrix,start):
     return distances, predecessors
 
 def draw_shortest_paths(screen, font, start_node):
-    distances, predecessors = dijkstra(matrix_values, start_node)
+    global adj_matrix
+    distances, predecessors = dijkstra(adj_matrix, start_node)
     
     # Iterate over the nodes to draw edges in the shortest path tree
     for node, pred in predecessors.items():
@@ -313,7 +429,8 @@ def simulate_page():
                 hovered_button = button  # Save hovered button for displaying info
 
         # Draw routes
-        draw_shortest_paths(screen, font, 2)  # Draw shortest paths from Singapore
+
+        draw_shortest_paths(screen, font, 2)
         """
         for route, color in zip([route_1, route_2, route_3], route_colors):
             pygame.draw.lines(screen, color, False, route, 5)  # '5' is the line thickness """
