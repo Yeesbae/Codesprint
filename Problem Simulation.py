@@ -2,6 +2,7 @@
 import pygame
 import sys
 import pandas as pd
+import heapq
 
 pygame.init()
 
@@ -117,6 +118,9 @@ def display_hover_info(new_port_info, x, y):
 
 def start_game():
     global current_page
+    global adjacency_matrix_headless
+    global matrix_values
+    matrix_values = adjacency_matrix_headless.values
     current_page = "game"
 
 def data_game():
@@ -146,7 +150,47 @@ def set_weight(country):
         for j in range(len(matrix_values[i])):
             if(i == country or j == country) and (matrix_values[i][j] != 0):
                 matrix_values[i][j] = 100
+
+def dijkstra(matrix,start):
+    n = len(matrix)
+    distances = {i: float('infinity') for i in range(n)}
+    distances[start] = 0
+    predecessors = {i: None for i in range(n)}
+    
+    priority_queue = [(0, start)]  # (distance, node)
+
+    while priority_queue:
+        current_distance, current_node = heapq.heappop(priority_queue)
+
+        if current_distance > distances[current_node]:
+            continue
+
+        for neighbor in range(n):
+            weight = matrix[current_node][neighbor]
+            if weight > 0:  # If there is an edge
+                distance = current_distance + weight
+                if distance < distances[neighbor]:
+                    distances[neighbor] = distance
+                    predecessors[neighbor] = current_node
+                    heapq.heappush(priority_queue, (distance, neighbor))
+
+    return distances, predecessors
+
+def draw_shortest_paths(screen, font, start_node):
+    distances, predecessors = dijkstra(matrix_values, start_node)
+    
+    # Iterate over the nodes to draw edges in the shortest path tree
+    for node, pred in predecessors.items():
+        if pred is not None:
+            # Get country names and positions
+            country1 = routedic[str(pred)]
+            country2 = routedic[str(node)]
+            pos1 = countrycoed_routes[country1]
+            pos2 = countrycoed_routes[country2]
             
+            # Draw the edge as a line
+            pygame.draw.line(screen, (0, 255, 0), pos1, pos2, 3)  # Green color for shortest path
+
 # Define Routes (List of waypoints for each route)
 """
 route_1 = [(SCREEN_WIDTH // 2.8, 140),(400, 120),(300, 100), (100, 130), (50, 300),(70, 400), (340, 850), (600, 830),(1030,400),(SCREEN_WIDTH // 1.54,350),(SCREEN_WIDTH // 1.24 , 480)]
@@ -269,7 +313,7 @@ def simulate_page():
                 hovered_button = button  # Save hovered button for displaying info
 
         # Draw routes
-
+        draw_shortest_paths(screen, font, 2)  # Draw shortest paths from Singapore
         """
         for route, color in zip([route_1, route_2, route_3], route_colors):
             pygame.draw.lines(screen, color, False, route, 5)  # '5' is the line thickness """
