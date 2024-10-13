@@ -3,6 +3,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 import pandas as pd
+import joblib
 
 # Example port data: [Berth, Quay Length (m), Area (ha), Max Depth (m), Quay Cranes,Capacity (‘000 TEUs)]
 
@@ -27,11 +28,11 @@ y = np.where(
     1, 
     0
 )
-print(X)
+# print(X)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=42)
 
-model = LogisticRegression(solver='lbfgs', max_iter=350)
+model = LogisticRegression(solver='lbfgs', max_iter=400)
 
 model.fit(X_train, y_train)
 
@@ -40,15 +41,22 @@ y_pred = model.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
 print(f"Accuracy: {accuracy:.2f}")
 
+
+# Save the trained model to a file
+model_filename = 'logistic_regression_model.pkl'
+joblib.dump(model, model_filename)
+print(f"Model saved to {model_filename}")
+
+
 new_ports = np.array([
     [51,18780,810,23,198,41154,0.03]
 ])
 
-predicted_congestion = model.predict(new_ports)
+# predicted_congestion = model.predict(new_ports)
 
-for i, prediction in enumerate(predicted_congestion):
-    print(f"New Port {i+1} Predicted Congestion Level: {'High' if prediction == 1 else 'Low'}")
+# for i, prediction in enumerate(predicted_congestion):
+#     print(f"New Port {i+1} Predicted Congestion Level: {'High' if prediction == 1 else 'Low'}")
 
-all_ports_predictions = model.predict(X)
-for i, prediction in enumerate(all_ports_predictions):
-    print(f"Port {i} Predicted Congestion Level: {'High' if prediction == 1 else 'Low'}")
+# all_ports_predictions = model.predict(X)
+# for i, prediction in enumerate(all_ports_predictions):
+#     print(f"Port {i} Predicted Congestion Level: {'High' if prediction == 1 else 'Low'}")
