@@ -14,12 +14,13 @@ pygame.display.set_caption("Algorithm Simulation")
 clock = pygame.time.Clock()
 
 # Load port data
-data = pd.read_csv('PSA_Ports_Data.csv')
-ports_data = data[["PortName", "Country", "Container Berth", "Area(ha)", "Port Congestion(%)","Designed Capacity(TEUs)","Suez Canal Risk","Strait of Malacca Risk","Bab el-Mandeb Risk","South China Sea Risk","Indian Ocean Monsoon Risk"			
-]]
 
 new_data = pd.read_csv('data_mk.csv')
 new_ports_data = new_data[["Port","Berth","Quay Length (m)","Area (ha)","Max Depth (m)","Quay Cranes","Capacity (‘000 TEUs)","Country","Congestion"]]
+
+adjacency_matrix = pd.read_csv('adjacency_matrix.csv')
+
+
 
 #Color Constants
 WHITE = (255, 255, 255)
@@ -88,20 +89,14 @@ class Button:
                     self.action()
                     return True
 
-def display_hover_info(port_info, x, y):
+def display_hover_info(new_port_info, x, y):
     """Display the port info at a specified position (x, y) with a rectangle border."""
     # Define the lines of text to display
-    """
-    lines = [
-        f"Port: {port_info['PortName'].values},",
-        f"Country: {port_info['Country'].values},",
-        f"Congestion: {port_info['Port Congestion(%)'].values}%,"
-    ]"""
 
     lines = [
-        f"Port: {port_info['Port'].values},",
-        f"Country: {port_info['Country'].values},",
-        f"Congestion: {port_info['Congestion'].values}%"
+        f"Port: {new_port_info['Port'].values},",
+        f"Country: {new_port_info['Country'].values},",
+        f"Congestion: {new_port_info['Congestion'].values}%"
     ]
 
     # Calculate the height of the text box based on the number of lines
@@ -139,9 +134,11 @@ def draw_text_with_solid_border(text, font, text_color, border_color, x, y, padd
 
 
 # Define Routes (List of waypoints for each route)
+"""
 route_1 = [(SCREEN_WIDTH // 2.8, 140),(400, 120),(300, 100), (100, 130), (50, 300),(70, 400), (340, 850), (600, 830),(1030,400),(SCREEN_WIDTH // 1.54,350),(SCREEN_WIDTH // 1.24 , 480)]
 route_2 = [(SCREEN_WIDTH // 2.8, 140),(560,200), (600, 250), (670, 360),(1030,400),(SCREEN_WIDTH // 1.54,350),(SCREEN_WIDTH // 1.24 , 480)]
-route_3=[(SCREEN_WIDTH // 2.8, 100),(600,90),(740,70),(800,40),(1000,40),(SCREEN_WIDTH // 1.1, 210),(SCREEN_WIDTH // 1.18, 350),(1520,120)]
+route_3 = [(SCREEN_WIDTH // 2.8, 100),(600,90),(740,70),(800,40),(1000,40),(SCREEN_WIDTH // 1.1, 210),(SCREEN_WIDTH // 1.18, 350),(1520,120)]
+"""
 
 # Define colors for the routes
 route_colors = [(255, 0, 0), (0, 0, 255),(0, 255, 0)]  # Red and Blue for different routes
@@ -155,7 +152,6 @@ start_button = Button("Start", SCREEN_WIDTH // 2 - 100, 500, 200, 80, GRAY, BLUE
 back_button = Button("Back", SCREEN_WIDTH // 2000, 0, 120, 40, GRAY, RED,"rect","", start_game)
 Next_button = Button("Next", SCREEN_WIDTH // 1.08, 0, 120, 40, GRAY, GREEN,"rect","", data_game)
 Previous_button = Button("Previous", SCREEN_WIDTH // 1900, 0, 150, 40, GRAY, GREEN,"rect","", data_game)
-ports_data['Country'] = ports_data['Country'].str.strip()
 new_ports_data['Country'] = new_ports_data['Country'].str.strip()
 #Singapore_data = ports_data[ports_data['Country'] == 'Singapore']
 #India_data = ports_data[ports_data['Country'] == 'India']
@@ -163,12 +159,25 @@ new_ports_data['Country'] = new_ports_data['Country'].str.strip()
 #China_data = ports_data[ports_data['Country'] == 'China']
 #Vietnam_data = ports_data[ports_data['Country'] == 'Vietnam']
 #print(ports_data[ports_data['Country'] == 'Turkey'])
+
+countrycoed = {
+    "Singapore": [SCREEN_WIDTH // 1.3, 450],
+    "India": [SCREEN_WIDTH // 1.65, 320],
+    "Turkey": [SCREEN_WIDTH // 3.1, 100],
+    "China": [SCREEN_WIDTH // 1.17, 190],
+    "Vietnam": [SCREEN_WIDTH // 1.25, 350],
+    "CapeTown": [SCREEN_WIDTH // 4.25, 800],
+    "SuezCanal": [SCREEN_WIDTH // 3.13, 155]
+}
+
 port_buttons = [
-    Button("Singapore", SCREEN_WIDTH // 1.3, 450, 120, 40, GRAY, BLUE, "circle", new_ports_data[new_ports_data['Country'] == 'Singapore'], data_game),
-    Button("India", SCREEN_WIDTH // 1.65, 320, 120, 40, GRAY, BLUE, "circle", new_ports_data[new_ports_data['Country'] == 'India'], data_game),
-    Button("Turkey", SCREEN_WIDTH // 3.1, 100, 120, 40, GRAY, BLUE, "circle", new_ports_data[new_ports_data['Country'] == 'Turkey'], data_game),
-    Button("China", SCREEN_WIDTH // 1.17, 190, 120, 40, GRAY, BLUE, "circle", new_ports_data[new_ports_data['Country'] == 'China'], data_game),
-    Button("Vietnam", SCREEN_WIDTH // 1.25, 350, 120, 40, GRAY, BLUE, "circle",new_ports_data[new_ports_data['Country'] == 'Vietnam'], data_game)
+    Button("Singapore", countrycoed['Singapore'][0],countrycoed['Singapore'][1], 120, 40, GRAY, BLUE, "circle", new_ports_data[new_ports_data['Country'] == 'Singapore'], data_game),
+    Button("India", countrycoed['India'][0],countrycoed['India'][1], 120, 40, GRAY, BLUE, "circle", new_ports_data[new_ports_data['Country'] == 'India'], data_game),
+    Button("Turkey", countrycoed['Turkey'][0],countrycoed['Turkey'][1], 120, 40, GRAY, BLUE, "circle", new_ports_data[new_ports_data['Country'] == 'Turkey'], data_game),
+    Button("China", countrycoed['China'][0],countrycoed['China'][1], 120, 40, GRAY, BLUE, "circle", new_ports_data[new_ports_data['Country'] == 'China'], data_game),
+    Button("Vietnam", countrycoed['Vietnam'][0],countrycoed['Vietnam'][1], 120, 40, GRAY, BLUE, "circle",new_ports_data[new_ports_data['Country'] == 'Vietnam'], data_game),
+    Button("CapeTown", countrycoed['CapeTown'][0],countrycoed['CapeTown'][1], 120, 40, GRAY, BLUE, "circle",None, None),
+    Button("SuezCanal", countrycoed['SuezCanal'][0],countrycoed['SuezCanal'][1], 120, 40, GRAY, BLUE, "circle",None, None),
 ]
 
 def game_page():
@@ -191,8 +200,10 @@ def game_page():
                 hovered_button = button  # Save hovered button for displaying info
 
         # Draw routes
+
+        """
         for route, color in zip([route_1, route_2, route_3], route_colors):
-            pygame.draw.lines(screen, color, False, route, 5)  # '5' is the line thickness
+            pygame.draw.lines(screen, color, False, route, 5)  # '5' is the line thickness """
 
         # Display hover info if there's a hovered button with associated port_info
         if hovered_button and hovered_button.port_info is not None:  # Check if port_info is not None
@@ -233,20 +244,6 @@ def data_page(country_data):
 
         if current_port_index < max_ports:  # Ensure index is within bounds
             row = country_data.iloc[current_port_index]  # Get the current row of data
-            """
-            lines = [
-                f"Port: {row['PortName']}",
-                f"Country: {row['Country']}",
-                f"Congestion: {row['Port Congestion(%)']}%",
-                f"Container Berth: {row['Container Berth']}", 
-                f"Area(ha): {row['Area(ha)']}",
-                f"Designed Capacity(TEUs): {row['Designed Capacity(TEUs)']}",
-                f"Suez Canal Risk: {row['Suez Canal Risk']}",
-                f"Strait of Malacca Risk: {row['Strait of Malacca Risk']}",
-                f"Bab el-Mandeb Risk: {row['Bab el-Mandeb Risk']}",
-                f"South China Sea Risk: {row['South China Sea Risk']}",
-                f"Indian Ocean Monsoon Risk: {row['Indian Ocean Monsoon Risk']}"
-            ]"""
 
             lines = [
                 f"Port: {row['Port']}",
