@@ -244,6 +244,7 @@ def start_game():
 def data_game():
     global current_page
     current_page = "data"
+
 def down_game():
     global current_page
     current_page = "down"
@@ -251,9 +252,36 @@ def down_game():
 def next_game():
     global current_page
     current_page = "next"
+
 def simulate_game():
     global current_page
     current_page = "simulate"
+
+def ai_simulate():
+    global current_page
+    current_page = "ai"
+
+def main_menu():
+    global current_page
+    current_page = "home"
+
+
+def draw_labels_and_boxes(screen, small_font, input_labels, input_boxes, input_texts):
+    for i, label in enumerate(input_labels):
+        label_surface = small_font.render(label, True, BLACK)
+        screen.blit(label_surface, (input_boxes[i].x - 300, input_boxes[i].y + 10))
+        pygame.draw.rect(screen, BLACK, input_boxes[i], 2)
+        text_surface = small_font.render(input_texts[i], True, BLACK)
+        screen.blit(text_surface, (input_boxes[i].x + 5, input_boxes[i].y + 5))
+        
+def handle_input(event, active_box, input_texts):
+    if event.key == pygame.K_RETURN:
+        return None  # Deselect active box on 'Enter'
+    elif event.key == pygame.K_BACKSPACE:
+        input_texts[active_box] = input_texts[active_box][:-1]  # Remove last character
+    else:
+        input_texts[active_box] += event.unicode  # Add character to input text
+    return active_box
     
 def draw_text_with_solid_border(text, font, text_color, border_color, x, y, padding=10):
     text_surf = font.render(text, True, text_color)
@@ -333,6 +361,9 @@ Down_button = Button("Down", SCREEN_WIDTH // 1900, 850, 150, 40, GRAY, RED,"rect
 Simulate_button = Button("Simulate", SCREEN_WIDTH // 1900, 850, 150, 40, GRAY, BLUE,"rect","", simulate_game)
 ExitSimulate_button = Button("Exit Simulation", SCREEN_WIDTH // 1400, 850, 200, 40, GRAY, BLUE,"rect","", start_game)
 new_ports_data['Country'] = new_ports_data['Country'].str.strip()
+ai_simulate_button = Button("AI Simulation", SCREEN_WIDTH // 2 - 100, 600, 200, 80, GRAY, BLUE, "rect", None, ai_simulate)
+home_button = Button("home", SCREEN_WIDTH // 2000, 0, 120, 40, GRAY, RED, "rect", None, main_menu)
+run_ai_button = Button("Run AI Simulation", SCREEN_WIDTH // 2 - 100, 750, 200, 80, GRAY, BLUE, "rect", None, ai_simulate)
 
 countrycoed = {
     "Singapore": [SCREEN_WIDTH // 1.3, 450],
@@ -343,6 +374,7 @@ countrycoed = {
     "CapeTown": [SCREEN_WIDTH // 4.25, 800],
     "SuezCanal": [SCREEN_WIDTH // 3.13, 155]
 }
+
 countrycoed_routes = {
     "Singapore": [SCREEN_WIDTH // 1.3 + 60, 450],
     "India": [SCREEN_WIDTH // 1.65 + 60, 320],
@@ -352,6 +384,7 @@ countrycoed_routes = {
     "CapeTown": [SCREEN_WIDTH // 4.25 + 60, 800],
     "SuezCanal": [SCREEN_WIDTH // 3.13 + 60, 155]
 }
+
 routedic = {
             '0': "Singapore",
             '1': "Vietnam",
@@ -596,7 +629,7 @@ def data_page(country_data):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            if back_button.check_click(event)and current_port_index==0:
+            if back_button.check_click(event) and current_port_index==0:
                 game_page()
             elif Next_button.check_click(event):
                 if current_port_index < max_ports - 1:
@@ -645,6 +678,63 @@ def data_page(country_data):
     pygame.quit()
     sys.exit()
 
+
+def ai_simulation_page():
+    running = True
+    input_labels = ["Berth:", "Quay Length (m):", "Area (ha):", "Quay Cranes:", "Capacity (‘000 TEUs):", "Congestion:"]
+    input_boxes = [pygame.Rect(450, 140 + i * 100, 300, 40) for i in range(6)]
+    input_texts = [""] * 6
+    active_box = None
+
+    while running:
+        screen.fill(WHITE)  # Clear screen with white background
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif home_button.check_click(event):
+                main_menu()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                for i, box in enumerate(input_boxes):
+                    if box.collidepoint(event.pos):
+                        active_box = i
+                        break
+                else:
+                    active_box = None
+            elif event.type == pygame.KEYDOWN and active_box is not None:
+                active_box = handle_input(event, active_box, input_texts)
+            elif run_ai_button.check_click(event):
+                if all(input_texts):
+                    input_values = [float(text) if text else 0 for text in input_texts]
+                    predicted_congestion = logistic_regression_model.predict([input_values])[0]
+                    result_text = "Predicted congestion: Congested" if predicted_congestion == 1 else "Predicted congestion: Not Congested"
+                    result_surface = small_font.render(result_text, True, BLACK)
+                    screen.blit(result_surface, (SCREEN_WIDTH - result_surface.get_width() - 20, SCREEN_HEIGHT // 2))
+                    persistent_result_text = result_text
+                else:
+                    error_text = "Please fill in all input fields."
+                    error_surface = small_font.render(error_text, True, RED)
+                    screen.blit(error_surface, (SCREEN_WIDTH // 2 - error_surface.get_width() // 2, SCREEN_HEIGHT // 2))
+                    persistent_result_text = error_text
+
+        if 'persistent_result_text' in locals():
+            result_surface = small_font.render(persistent_result_text, True, BLACK)
+            screen.blit(result_surface, (SCREEN_WIDTH - result_surface.get_width() - 20, SCREEN_HEIGHT // 2))
+
+        home_button.draw(screen, button_font)
+        run_ai_button.draw(screen, button_font)
+        
+        instruction_text = "Enter only integers or decimals, no text"
+        instruction_surface = small_font.render(instruction_text, True, RED)
+        screen.blit(instruction_surface, (SCREEN_WIDTH // 2 - instruction_surface.get_width() // 2, 50))
+        draw_labels_and_boxes(screen, small_font, input_labels, input_boxes, input_texts)
+
+        pygame.display.flip()
+        clock.tick(60)
+
+    pygame.quit()
+    sys.exit()
+
+
 def main_menu():
     global current_page
     running = True
@@ -653,19 +743,23 @@ def main_menu():
             if event.type == pygame.QUIT:
                 running = False
             start_button.check_click(event)
+            ai_simulate_button.check_click(event)
         
         screen.blit(world_map, (0, 0))
         draw_text_with_solid_border("Main Menu", font, BLACK, GRAY, SCREEN_WIDTH // 2, 100)
         start_button.draw(screen,button_font)
-        draw_text_with_solid_border("Ming Kai", small_font, BLACK, GRAY, SCREEN_WIDTH // 2, 630)
-        draw_text_with_solid_border("Wei Hao", small_font, BLACK, GRAY, SCREEN_WIDTH // 2, 670)
-        draw_text_with_solid_border("Chris", small_font, BLACK, GRAY, SCREEN_WIDTH // 2, 710)
+        ai_simulate_button.draw(screen, small_font)
+        draw_text_with_solid_border("Ming Kai", small_font, BLACK, GRAY, SCREEN_WIDTH // 2, 700)
+        draw_text_with_solid_border("Wei Hao", small_font, BLACK, GRAY, SCREEN_WIDTH // 2, 740)
+        draw_text_with_solid_border("Chris", small_font, BLACK, GRAY, SCREEN_WIDTH // 2, 780)
 
         pygame.display.flip()
         clock.tick(60)
         
         if current_page == "game":
             game_page()
+        if current_page == "ai":
+            ai_simulation_page()
 
         
     
