@@ -19,7 +19,8 @@ new_data = pd.read_csv('data_mk.csv')
 new_ports_data = new_data[["Port","Berth","Quay Length (m)","Area (ha)","Max Depth (m)","Quay Cranes","Capacity (‘000 TEUs)","Country","Congestion"]]
 
 adjacency_matrix = pd.read_csv('adjacency_matrix.csv')
-
+locations = adjacency_matrix.index
+adjacency_matrix_headless = adjacency_matrix.drop(adjacency_matrix.columns[0], axis=1)
 
 
 #Color Constants
@@ -169,6 +170,24 @@ countrycoed = {
     "CapeTown": [SCREEN_WIDTH // 4.25, 800],
     "SuezCanal": [SCREEN_WIDTH // 3.13, 155]
 }
+countrycoed_routes = {
+    "Singapore": [SCREEN_WIDTH // 1.3 + 60, 450],
+    "India": [SCREEN_WIDTH // 1.65 + 60, 320],
+    "Turkey": [SCREEN_WIDTH // 3.1 + 60, 100],
+    "China": [SCREEN_WIDTH // 1.17 + 60, 190],
+    "Vietnam": [SCREEN_WIDTH // 1.25 + 60, 350],
+    "CapeTown": [SCREEN_WIDTH // 4.25 + 60, 800],
+    "SuezCanal": [SCREEN_WIDTH // 3.13 + 60, 155]
+}
+routedic = {
+            '0': "Singapore",
+            '1': "Vietnam",
+            '2': "Turkey",
+            '3': "China",
+            '4': "India",
+            '5': "CapeTown",
+            '6': "SuezCanal"
+}
 
 port_buttons = [
     Button("Singapore", countrycoed['Singapore'][0],countrycoed['Singapore'][1], 120, 40, GRAY, BLUE, "circle", new_ports_data[new_ports_data['Country'] == 'Singapore'], data_game),
@@ -204,7 +223,18 @@ def game_page():
         """
         for route, color in zip([route_1, route_2, route_3], route_colors):
             pygame.draw.lines(screen, color, False, route, 5)  # '5' is the line thickness """
+        
+        
 
+        for i in range(len(adjacency_matrix_headless)):
+            for j in range(len(adjacency_matrix_headless.columns)):
+                if(adjacency_matrix_headless.iloc[i,j] != 0):
+                    country1 = routedic[str(i)]
+                    country2 = routedic[str(j)]
+                    pos1 = countrycoed_routes[country1]
+                    pos2 = countrycoed_routes[country2]
+                    pygame.draw.line(screen, (0,0,0),pos1,pos2,3)
+                    
         # Display hover info if there's a hovered button with associated port_info
         if hovered_button and hovered_button.port_info is not None:  # Check if port_info is not None
             display_hover_info(hovered_button.port_info, pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
