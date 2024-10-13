@@ -217,7 +217,7 @@ def display_hover_info(new_port_info, x, y):
     lines = [
         f"Port: {new_port_info['Port'].values},",
         f"Country: {new_port_info['Country'].values},",
-        f"Congestion: {new_port_info['Congestion'].values}%"
+        f"Congestion: {[f'{val * 100:.0f}%' for val in new_port_info['Congestion'].values]}"
     ]
 
     # Calculate the height of the text box based on the number of lines
@@ -458,7 +458,7 @@ def simulate_page():
         # Display hover info if there's a hovered button with associated port_info
         if hovered_button and hovered_button.port_info is not None:  # Check if port_info is not None
             display_hover_info(hovered_button.port_info, pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
-
+        
         pygame.display.flip()
         clock.tick(60)
         if current_page == "down":
@@ -553,7 +553,7 @@ def simdata_page(country_data):
             lines = [
                 f"Port: {row['Port']}",
                 f"Country: {row['Country']}",
-                f"Congestion: {row['Congestion']}%",
+                f"Congestion: {row['Congestion']*100:.0f}%",
                 f"Berth: {row['Berth']}",
                 f"Quay Length (m): {row['Quay Length (m)']}",
                 f"Area (ha): {row['Area (ha)']}",
@@ -615,7 +615,7 @@ def data_page(country_data):
             lines = [
                 f"Port: {row['Port']}",
                 f"Country: {row['Country']}",
-                f"Congestion: {row['Congestion']}%",
+                f"Congestion: {row['Congestion']*100:.0f}%",
                 f"Berth: {row['Berth']}",
                 f"Quay Length (m): {row['Quay Length (m)']}",
                 f"Area (ha): {row['Area (ha)']}",
