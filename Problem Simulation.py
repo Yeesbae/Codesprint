@@ -214,7 +214,7 @@ countrycoed = {
     "Singapore": [SCREEN_WIDTH // 1.3, 450],
     "India": [SCREEN_WIDTH // 1.65, 320],
     "Turkey": [SCREEN_WIDTH // 3.1, 100],
-    "China": [SCREEN_WIDTH // 1.17, 190],
+    "China": [SCREEN_WIDTH // 1.14, 190],
     "Vietnam": [SCREEN_WIDTH // 1.25, 350],
     "CapeTown": [SCREEN_WIDTH // 4.25, 800],
     "SuezCanal": [SCREEN_WIDTH // 3.13, 155]
@@ -223,7 +223,7 @@ countrycoed_routes = {
     "Singapore": [SCREEN_WIDTH // 1.3 + 60, 450],
     "India": [SCREEN_WIDTH // 1.65 + 60, 320],
     "Turkey": [SCREEN_WIDTH // 3.1 + 60, 100],
-    "China": [SCREEN_WIDTH // 1.17 + 60, 190],
+    "China": [SCREEN_WIDTH // 1.14 + 60, 190],
     "Vietnam": [SCREEN_WIDTH // 1.25 + 60, 350],
     "CapeTown": [SCREEN_WIDTH // 4.25 + 60, 800],
     "SuezCanal": [SCREEN_WIDTH // 3.13 + 60, 155]
