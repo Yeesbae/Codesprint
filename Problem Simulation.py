@@ -8,6 +8,7 @@ import joblib as jb
 import math
 import networkx as nx
 import numpy as np
+import copy
 
 pygame.init()
 
@@ -136,9 +137,11 @@ for u, v, d in G.edges(data=True):
     if congestion_u == 1 or congestion_v == 1:
         d['weight'] *= 20  # Increase weight by 1000%
 
+country_sim = 2
+
 adj_matrice = nx.to_numpy_array(G, weight='weight')
 adj_matrice = np.round(adj_matrice)
-adj_matrix = adj_matrice
+adj_matrix = copy.deepcopy(adj_matrice)
 #Color Constants
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -235,7 +238,7 @@ def start_game():
     global current_page
     global adj_matrix
     global adj_matrice
-    adj_matrix = adj_matrice
+    adj_matrix = copy.deepcopy(adj_matrice)
     current_page = "game"
 
 def data_game():
@@ -263,8 +266,12 @@ def set_weight(country):
     global adj_matrix
     for i in range(len(adj_matrix)):
         for j in range(len(adj_matrix[i])):
-            if(i == country or j == country) and (matrix_values[i][j] != 0):
-                matrix_values[i][j] = 100
+            if(i == country or j == country) and (adj_matrix[i][j] != 0):
+                adj_matrix[i][j] = 100
+
+def set_port(country):
+    global country_sim
+    country_sim = country
 
 def dijkstra(matrix,start):
     n = len(matrix)
@@ -294,7 +301,7 @@ def dijkstra(matrix,start):
 def draw_shortest_paths(screen, font, start_node):
     global adj_matrix
     distances, predecessors = dijkstra(adj_matrix, start_node)
-    
+    counter = 6
     # Iterate over the nodes to draw edges in the shortest path tree
     for node, pred in predecessors.items():
         if pred is not None:
@@ -305,7 +312,8 @@ def draw_shortest_paths(screen, font, start_node):
             pos2 = countrycoed_routes[country2]
             
             # Draw the edge as a line
-            pygame.draw.line(screen, (0, 255, 0), pos1, pos2, 3)  # Green color for shortest path
+            pygame.draw.line(screen, (0, 255*counter/6, 0), pos1, pos2, 3)
+            counter-=1  # Green color for shortest path
 
 # Define Routes (List of waypoints for each route)
 """
@@ -378,6 +386,13 @@ def down_page():
             Button("SuezCanal",SCREEN_WIDTH // 2 - 100, 700, 200, 80,GRAY, RED, "rect",None, lambda: set_weight(6)),
         ]
     
+    sim_buttons = [
+        Button("Set Singapore", 100, 100, 200, 80, GRAY, RED, "rect",None, lambda: set_port(0)),
+        Button("Set India", 100, 200, 200, 80, GRAY, RED, "rect",None, lambda: set_port(4)),
+        Button("Set Turkey", 100, 300, 200, 80, GRAY, RED, "rect",None, lambda: set_port(2)),
+        Button("Set China",  100, 400, 200, 80, GRAY, RED, "rect",None, lambda: set_port(3)),
+        Button("Set Vietnam", 100, 500, 200, 80, GRAY, RED, "rect",None,lambda: set_port(1)),
+    ]
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -393,6 +408,9 @@ def down_page():
         for button in port_buttons:
              button.draw(screen, button_font)
         
+        for button in sim_buttons:
+            button.draw(screen, button_font)
+
         Simulate_button.draw(screen,small_font)
 
         pygame.display.flip()
@@ -408,8 +426,8 @@ def down_page():
 
 def simulate_page():
     running = True
-    global matrix_values
-    print(matrix_values)
+    global adj_matrix
+    print(adj_matrix)
 
     while running:
         screen.blit(simulated_map, (0, 0))
@@ -430,7 +448,7 @@ def simulate_page():
 
         # Draw routes
 
-        draw_shortest_paths(screen, font, 2)
+        draw_shortest_paths(screen, font, country_sim)
         """
         for route, color in zip([route_1, route_2, route_3], route_colors):
             pygame.draw.lines(screen, color, False, route, 5)  # '5' is the line thickness """
