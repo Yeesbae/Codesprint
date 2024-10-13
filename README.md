@@ -1,6 +1,7 @@
 # Code Sprint
 ## Byte Me
-## Main file is Problem Solution.py
+## working Protoype
+Run Problem Solution.py
 # Frontend
 Our solution is shown in An UI developed in Pygame to showcase the algorithm developed for route planning. 
 # Backend
